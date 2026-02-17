@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Algo Explorer | Lightweight Algorand Block Explorer</title>
   <meta name="description" content="A lightweight, fast Algorand block explorer. Browse blocks, transactions, accounts, and ASA tokens on Algorand mainnet.">
+  <meta property="og:title" content="Algo Explorer | Lightweight Algorand Block Explorer">
+  <meta property="og:description" content="Browse blocks, transactions, accounts, and ASA tokens on Algorand mainnet.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://corvid-agent.github.io/algo-explorer/">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x26D3;</text></svg>">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap');
@@ -899,6 +903,8 @@
           <a href="#" class="nav-link" onclick="goToDashboard(event)">Txn Charts</a>
           <a href="https://corvid-agent.github.io/agent-dashboard/" class="nav-link">Dashboard</a>
           <a href="https://corvid-agent.github.io/agent-profile/" class="nav-link">Profile</a>
+          <a href="https://corvid-agent.github.io/corvid-agent-chat/" class="nav-link">Chat</a>
+          <a href="https://corvid-agent.github.io/bw-cinema/" class="nav-link">Cinema</a>
           <a href="https://corvid-agent.github.io/" class="nav-link">Home</a>
         </nav>
       </div>
@@ -992,6 +998,14 @@
   <div class="toast" id="toast"></div>
 
   <div class="footer">
+    <div style="display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
+      <a href="https://corvid-agent.github.io/" style="color: var(--text-dim); text-decoration: none; font-size: 0.8rem; transition: color 0.2s;" onmouseover="this.style.color='var(--algo-teal)'" onmouseout="this.style.color='var(--text-dim)'">Home</a>
+      <a href="https://corvid-agent.github.io/agent-dashboard/" style="color: var(--text-dim); text-decoration: none; font-size: 0.8rem; transition: color 0.2s;" onmouseover="this.style.color='var(--algo-teal)'" onmouseout="this.style.color='var(--text-dim)'">Dashboard</a>
+      <a href="https://corvid-agent.github.io/agent-profile/" style="color: var(--text-dim); text-decoration: none; font-size: 0.8rem; transition: color 0.2s;" onmouseover="this.style.color='var(--algo-teal)'" onmouseout="this.style.color='var(--text-dim)'">Profile</a>
+      <a href="https://corvid-agent.github.io/corvid-agent-chat/" style="color: var(--text-dim); text-decoration: none; font-size: 0.8rem; transition: color 0.2s;" onmouseover="this.style.color='var(--algo-teal)'" onmouseout="this.style.color='var(--text-dim)'">Chat</a>
+      <a href="https://corvid-agent.github.io/bw-cinema/" style="color: var(--text-dim); text-decoration: none; font-size: 0.8rem; transition: color 0.2s;" onmouseover="this.style.color='var(--algo-teal)'" onmouseout="this.style.color='var(--text-dim)'">Cinema</a>
+      <a href="https://github.com/corvid-agent" target="_blank" rel="noopener" style="color: var(--text-dim); text-decoration: none; font-size: 0.8rem; transition: color 0.2s;" onmouseover="this.style.color='var(--algo-teal)'" onmouseout="this.style.color='var(--text-dim)'">GitHub</a>
+    </div>
     <p class="footer-text">
       Built by <a href="https://corvid-agent.github.io">corvid-agent</a> &mdash;
       Data from <a href="https://developer.algorand.org/docs/rest-apis/algod/">Algorand Algod</a> &amp;
@@ -1836,6 +1850,9 @@
             <div class="account-addr">
               <span>${address}</span>
               ${copyBtnHtml(address)}
+            </div>
+            <div style="margin-top: -0.5rem; margin-bottom: 0.5rem;">
+              <a href="https://allo.info/account/${address}" target="_blank" rel="noopener" style="font-size: 0.78rem; color: var(--algo-teal); text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem;">View on Allo.info <span style="font-size: 0.7rem;">&nearr;</span></a>
             </div>
           </div>
           <div class="detail-row">
