@@ -4,7 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Algo Explorer | Lightweight Algorand Block Explorer</title>
-  <meta name="description" content="A lightweight, fast Algorand block explorer. Browse blocks, transactions, and accounts on Algorand mainnet.">
+  <meta name="description" content="A lightweight, fast Algorand block explorer. Browse blocks, transactions, accounts, and ASA tokens on Algorand mainnet.">
+  <meta property="og:title" content="Algo Explorer | Lightweight Algorand Block Explorer">
+  <meta property="og:description" content="Browse blocks, transactions, accounts, and ASA tokens on Algorand mainnet.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://corvid-agent.github.io/algo-explorer/">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Algo Explorer | Lightweight Algorand Block Explorer">
+  <meta name="twitter:description" content="Browse blocks, transactions, accounts, and ASA tokens on Algorand mainnet.">
+  <link rel="canonical" href="https://corvid-agent.github.io/algo-explorer/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x26D3;</text></svg>">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap');
@@ -13,6 +23,7 @@
       --bg: #0a0a0f;
       --bg-panel: #12121a;
       --bg-hover: #1a1a25;
+      --bg-card: #151520;
       --border: #1e1e2e;
       --text: #c8ccd8;
       --text-dim: #5a5f72;
@@ -24,6 +35,8 @@
       --green: #10b981;
       --red: #ef4444;
       --yellow: #f59e0b;
+      --orange: #f97316;
+      --pink: #ec4899;
       --mono: 'JetBrains Mono', monospace;
       --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
@@ -38,6 +51,48 @@
       min-height: 100vh;
     }
 
+    /* Network Health Banner */
+    .health-banner {
+      background: linear-gradient(90deg, rgba(0,194,168,0.08) 0%, rgba(0,194,168,0.03) 50%, rgba(108,92,231,0.08) 100%);
+      border-bottom: 1px solid rgba(0,194,168,0.15);
+      padding: 0.5rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      font-size: 0.75rem;
+      font-family: var(--mono);
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .health-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--text-dim);
+    }
+
+    .health-item .val {
+      color: var(--algo-teal);
+      font-weight: 600;
+    }
+
+    .live-dot {
+      width: 8px; height: 8px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: livePulse 1.5s ease-in-out infinite;
+      box-shadow: 0 0 6px rgba(16,185,129,0.5);
+    }
+
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    .health-label { color: var(--text-dim); }
+
     /* Header */
     .header {
       background: var(--bg-panel);
@@ -51,6 +106,12 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
     }
 
     .logo {
@@ -76,6 +137,27 @@
 
     .logo span { color: var(--algo-teal); }
 
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+    }
+
+    .nav-link {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: color 0.2s;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--algo-teal);
+      background: rgba(0,194,168,0.08);
+    }
+
     .network-badge {
       display: flex;
       align-items: center;
@@ -99,6 +181,21 @@
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.3; }
+    }
+
+    /* Keyboard hint */
+    .kbd {
+      display: inline-block;
+      padding: 0.1rem 0.4rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      line-height: 1.4;
+      vertical-align: middle;
+      margin-left: 0.4rem;
     }
 
     /* Search */
@@ -218,6 +315,7 @@
       color: var(--algo-teal);
       text-decoration: none;
       font-weight: 500;
+      cursor: pointer;
     }
 
     .panel-link:hover { text-decoration: underline; }
@@ -234,6 +332,7 @@
 
     .block-row:hover { background: var(--bg-hover); }
     .block-row:last-child { border-bottom: none; }
+    .block-row.focused { background: var(--bg-hover); outline: 1px solid var(--algo-teal); outline-offset: -1px; }
 
     .block-icon {
       width: 36px; height: 36px;
@@ -291,6 +390,7 @@
 
     .txn-row:hover { background: var(--bg-hover); }
     .txn-row:last-child { border-bottom: none; }
+    .txn-row.focused { background: var(--bg-hover); outline: 1px solid var(--algo-teal); outline-offset: -1px; }
 
     .txn-icon {
       width: 36px; height: 36px;
@@ -307,6 +407,9 @@
     .txn-icon.axfer { background: rgba(108, 92, 231, 0.1); }
     .txn-icon.appl { background: rgba(0, 210, 255, 0.1); }
     .txn-icon.acfg { background: rgba(245, 158, 11, 0.1); }
+    .txn-icon.afrz { background: rgba(236, 72, 153, 0.1); }
+    .txn-icon.keyreg { background: rgba(249, 115, 22, 0.1); }
+    .txn-icon.stpf { background: rgba(139, 92, 246, 0.1); }
 
     .txn-info { flex: 1; min-width: 0; }
 
@@ -334,6 +437,9 @@
     .txn-type.axfer { background: rgba(108, 92, 231, 0.1); color: var(--accent); }
     .txn-type.appl { background: rgba(0, 210, 255, 0.1); color: var(--accent-2); }
     .txn-type.acfg { background: rgba(245, 158, 11, 0.1); color: var(--yellow); }
+    .txn-type.afrz { background: rgba(236, 72, 153, 0.1); color: var(--pink); }
+    .txn-type.keyreg { background: rgba(249, 115, 22, 0.1); color: var(--orange); }
+    .txn-type.stpf { background: rgba(139, 92, 246, 0.1); color: var(--accent); }
 
     .txn-addrs {
       font-size: 0.72rem;
@@ -366,7 +472,7 @@
       color: var(--text-dim);
     }
 
-    /* Detail panel */
+    /* Detail panel / overlay */
     .detail-overlay {
       display: none;
       position: fixed;
@@ -385,10 +491,21 @@
       border: 1px solid var(--border);
       border-radius: 16px;
       width: 90%;
-      max-width: 600px;
-      max-height: 80vh;
+      max-width: 700px;
+      max-height: 85vh;
       overflow-y: auto;
       padding: 2rem;
+    }
+
+    .detail-panel::-webkit-scrollbar {
+      width: 6px;
+    }
+    .detail-panel::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .detail-panel::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
     }
 
     .detail-header {
@@ -418,8 +535,10 @@
     .detail-row {
       display: flex;
       justify-content: space-between;
+      align-items: flex-start;
       padding: 0.6rem 0;
       border-bottom: 1px solid var(--border);
+      gap: 1rem;
     }
 
     .detail-row:last-child { border-bottom: none; }
@@ -427,6 +546,7 @@
     .detail-key {
       font-size: 0.82rem;
       color: var(--text-dim);
+      flex-shrink: 0;
     }
 
     .detail-val {
@@ -434,10 +554,220 @@
       font-size: 0.82rem;
       color: var(--text-bright);
       text-align: right;
-      max-width: 300px;
+      max-width: 400px;
       overflow: hidden;
       text-overflow: ellipsis;
       word-break: break-all;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Copy button */
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      cursor: pointer;
+      padding: 0.15rem 0.35rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      flex-shrink: 0;
+      transition: all 0.15s;
+      font-family: var(--sans);
+    }
+
+    .copy-btn:hover {
+      border-color: var(--algo-teal);
+      color: var(--algo-teal);
+    }
+
+    .copy-btn.copied {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    /* Section divider in details */
+    .detail-section {
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border);
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-bright);
+    }
+
+    /* Block txn list inside detail */
+    .block-txn-item {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(26,29,40,0.5);
+      font-size: 0.8rem;
+      gap: 0.8rem;
+    }
+    .block-txn-item:last-child { border-bottom: none; }
+
+    .block-txn-type {
+      display: inline-block;
+      font-size: 0.6rem;
+      padding: 0.1rem 0.35rem;
+      border-radius: 3px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+      min-width: 32px;
+      text-align: center;
+    }
+
+    .block-txn-sender {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .block-txn-amount {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text-bright);
+      flex-shrink: 0;
+    }
+
+    /* ASA card in detail */
+    .asa-card {
+      padding: 1.5rem;
+    }
+
+    .asa-name {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 0.2rem;
+    }
+
+    .asa-unit {
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--algo-teal);
+      margin-bottom: 1rem;
+    }
+
+    .asa-id-badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      background: rgba(108,92,231,0.1);
+      border: 1px solid rgba(108,92,231,0.2);
+      border-radius: 100px;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--accent);
+      margin-left: 0.5rem;
+    }
+
+    /* Portfolio holdings */
+    .holdings-list {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .holding-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.45rem 0;
+      border-bottom: 1px solid rgba(26,29,40,0.5);
+      font-size: 0.8rem;
+    }
+
+    .holding-row:last-child { border-bottom: none; }
+
+    .holding-name {
+      color: var(--text);
+      font-size: 0.78rem;
+    }
+
+    .holding-name .asa-id-sm {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--text-dim);
+    }
+
+    .holding-amount {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--text-bright);
+    }
+
+    /* Transaction type distribution chart */
+    .chart-container {
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+    }
+
+    .chart-svg {
+      flex-shrink: 0;
+    }
+
+    .chart-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+      color: var(--text);
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .legend-count {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      margin-left: auto;
+      padding-left: 0.5rem;
+    }
+
+    /* Account info */
+    .account-info {
+      padding: 1.5rem;
+    }
+
+    .account-balance {
+      font-family: var(--mono);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--algo-teal);
+      margin-bottom: 0.5rem;
+    }
+
+    .account-addr {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      word-break: break-all;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
     }
 
     /* Loading */
@@ -466,25 +796,23 @@
     /* Full-width panel */
     .span-full { grid-column: 1 / -1; }
 
-    /* Account lookup result */
-    .account-info {
-      padding: 1.5rem;
-    }
-
-    .account-balance {
-      font-family: var(--mono);
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--algo-teal);
-      margin-bottom: 0.5rem;
-    }
-
-    .account-addr {
-      font-family: var(--mono);
-      font-size: 0.75rem;
+    /* Shortcuts help */
+    .shortcuts-bar {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0.5rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      font-size: 0.72rem;
       color: var(--text-dim);
-      word-break: break-all;
-      margin-bottom: 1rem;
+    }
+
+    .shortcut-hint {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
     }
 
     /* Navigation */
@@ -573,17 +901,91 @@
 
     .footer-text a:hover { text-decoration: underline; }
 
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--bg-panel);
+      border: 1px solid var(--algo-teal);
+      color: var(--text-bright);
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-family: var(--mono);
+      z-index: 300;
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .main { grid-template-columns: 1fr; }
       .chain-stats { grid-template-columns: repeat(2, 1fr); }
       .header-inner { flex-direction: column; gap: 0.5rem; }
-      .nav-links { gap: 0.8rem; }
+      .nav-links { gap: 0.6rem; }
       .nav-links a { font-size: 0.75rem; }
+      .header-left { flex-direction: column; gap: 0.5rem; }
+      .health-banner { gap: 1rem; font-size: 0.65rem; padding: 0.4rem 1rem; }
+      .chart-container { flex-direction: column; }
+      .shortcuts-bar { display: none; }
     }
   </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Algo Explorer",
+    "description": "Lightweight Algorand block explorer — browse blocks, transactions, accounts, and ASA tokens on mainnet.",
+    "url": "https://corvid-agent.github.io/algo-explorer/",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Web",
+    "author": {
+      "@type": "Organization",
+      "name": "corvid-agent",
+      "url": "https://corvid-agent.github.io"
+    }
+  }
+  </script>
 </head>
 <body>
+  <noscript>
+    <div style="background:#1a1a2e;color:#e0e0e8;padding:2rem;text-align:center;font-family:sans-serif;">
+      <h1>Algo Explorer</h1>
+      <p>This explorer requires JavaScript to fetch blockchain data. Please enable JavaScript to continue.</p>
+    </div>
+  </noscript>
+
+  <!-- Network Health Banner -->
+  <div class="health-banner">
+    <div class="health-item">
+      <div class="live-dot"></div>
+      <span class="health-label">LIVE</span>
+    </div>
+    <div class="health-item">
+      <span class="health-label">Round:</span>
+      <span class="val" id="health-round">--</span>
+    </div>
+    <div class="health-item">
+      <span class="health-label">Block Time:</span>
+      <span class="val" id="health-blocktime">--</span>
+    </div>
+    <div class="health-item">
+      <span class="health-label">TPS:</span>
+      <span class="val" id="health-tps">--</span>
+    </div>
+    <div class="health-item">
+      <span class="health-label">Updated:</span>
+      <span class="val" id="health-updated">--</span>
+    </div>
+  </div>
 
   <nav class="nav">
     <a href="https://corvid-agent.github.io" class="nav-logo">
@@ -602,10 +1004,21 @@
 
   <div class="header">
     <div class="header-inner">
-      <a href="#" class="logo">
-        <div class="logo-icon">&#x26D3;</div>
-        <span>algo</span>explorer
-      </a>
+      <div class="header-left">
+        <a href="#" class="logo" onclick="goHome(event)">
+          <div class="logo-icon">&#x26D3;</div>
+          <span>algo</span>explorer
+        </a>
+        <nav class="nav-links">
+          <a href="#" class="nav-link active" onclick="goHome(event)">Explorer</a>
+          <a href="#" class="nav-link" onclick="goToDashboard(event)">Txn Charts</a>
+          <a href="https://corvid-agent.github.io/agent-dashboard/" class="nav-link">Dashboard</a>
+          <a href="https://corvid-agent.github.io/agent-profile/" class="nav-link">Profile</a>
+          <a href="https://corvid-agent.github.io/corvid-agent-chat/" class="nav-link">Chat</a>
+          <a href="https://corvid-agent.github.io/bw-cinema/" class="nav-link">Cinema</a>
+          <a href="https://corvid-agent.github.io/" class="nav-link">Home</a>
+        </nav>
+      </div>
       <div class="network-badge">
         <span class="net-dot"></span>
         Mainnet
@@ -617,10 +1030,18 @@
   <div class="search-section">
     <div class="search-box">
       <input type="text" class="search-input" id="search-input"
-        placeholder="Search by block, transaction ID, or address..."
+        placeholder="Search block, txn ID, address, or ASA ID..."
         onkeydown="if(event.key==='Enter') handleSearch()">
       <button class="search-btn" onclick="handleSearch()">Search</button>
     </div>
+  </div>
+
+  <!-- Keyboard shortcuts hint -->
+  <div class="shortcuts-bar">
+    <div class="shortcut-hint"><kbd class="kbd">/</kbd> Search</div>
+    <div class="shortcut-hint"><kbd class="kbd">Esc</kbd> Close</div>
+    <div class="shortcut-hint"><kbd class="kbd">&uarr;&darr;</kbd> Navigate</div>
+    <div class="shortcut-hint"><kbd class="kbd">Enter</kbd> View details</div>
   </div>
 
   <!-- Chain Stats -->
@@ -644,9 +1065,9 @@
   </div>
 
   <!-- Main Grid -->
-  <div class="main">
+  <div class="main" id="main-grid">
     <!-- Latest Blocks -->
-    <div class="panel">
+    <div class="panel" id="blocks-panel">
       <div class="panel-header">
         <span class="panel-title">Latest Blocks</span>
         <span class="panel-link" onclick="fetchBlocks()">Refresh</span>
@@ -657,7 +1078,7 @@
     </div>
 
     <!-- Latest Transactions -->
-    <div class="panel">
+    <div class="panel" id="txns-panel">
       <div class="panel-header">
         <span class="panel-title">Recent Transactions</span>
         <span class="panel-link" onclick="fetchTransactions()">Refresh</span>
@@ -666,12 +1087,26 @@
         <div class="loading"><div class="spinner"></div>Loading transactions...</div>
       </div>
     </div>
+
+    <!-- Transaction Type Distribution Chart -->
+    <div class="panel span-full" id="chart-panel">
+      <div class="panel-header">
+        <span class="panel-title">Transaction Type Distribution</span>
+        <span class="panel-link" onclick="fetchTransactions()">Refresh</span>
+      </div>
+      <div id="chart-area">
+        <div class="loading"><div class="spinner"></div>Loading chart...</div>
+      </div>
+    </div>
   </div>
 
   <!-- Detail overlay -->
   <div class="detail-overlay" id="detail-overlay" onclick="if(event.target===this) closeDetail()">
     <div class="detail-panel" id="detail-panel"></div>
   </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
 
   <div class="footer">
     <div class="footer-nav">
@@ -694,7 +1129,17 @@
     const ALGOD_API = 'https://mainnet-api.4160.nodely.dev';
     const INDEXER_API = 'https://mainnet-idx.4160.nodely.dev';
 
-    // Format helpers
+    // State for keyboard navigation
+    let navState = {
+      panel: 'blocks', // 'blocks' or 'txns'
+      index: -1,
+      blockRounds: [],
+      txnIds: [],
+      recentTxns: [] // store full txn data for chart
+    };
+
+    // ── Format helpers ──
+
     function microAlgoToAlgo(micro) {
       return (micro / 1_000_000).toFixed(6);
     }
@@ -725,26 +1170,265 @@
       return n.toString();
     }
 
-    // Fetch chain status
-    async function fetchStatus() {
+    function formatSupply(total, decimals) {
+      if (decimals > 0) {
+        const val = total / Math.pow(10, decimals);
+        return val.toLocaleString(undefined, { maximumFractionDigits: decimals });
+      }
+      return total.toLocaleString();
+    }
+
+    // ── Toast ──
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    // ── Copy to clipboard ──
+
+    function copyToClipboard(text, btnEl) {
+      navigator.clipboard.writeText(text).then(() => {
+        if (btnEl) {
+          btnEl.textContent = 'Copied';
+          btnEl.classList.add('copied');
+          setTimeout(() => {
+            btnEl.textContent = 'Copy';
+            btnEl.classList.remove('copied');
+          }, 1500);
+        }
+        showToast('Copied to clipboard');
+      }).catch(() => {
+        // Fallback
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast('Copied to clipboard');
+      });
+    }
+
+    function copyBtnHtml(text) {
+      const escaped = text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+      return `<button class="copy-btn" onclick="event.stopPropagation(); copyToClipboard('${escaped}', this)">Copy</button>`;
+    }
+
+    // ── Navigation ──
+
+    function goHome(e) {
+      e.preventDefault();
+      closeDetail();
+      document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+      document.querySelector('.nav-link').classList.add('active');
+      showMainView();
+    }
+
+    function goToDashboard(e) {
+      e.preventDefault();
+      closeDetail();
+      document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+      document.querySelectorAll('.nav-link')[1].classList.add('active');
+      showDashboardView();
+    }
+
+    function showMainView() {
+      const grid = document.getElementById('main-grid');
+      document.getElementById('blocks-panel').style.display = '';
+      document.getElementById('txns-panel').style.display = '';
+      document.getElementById('chart-panel').style.display = '';
+      // Remove any dashboard panel if exists
+      const dp = document.getElementById('dashboard-panel');
+      if (dp) dp.remove();
+    }
+
+    function showDashboardView() {
+      const grid = document.getElementById('main-grid');
+      // Check if dashboard already exists
+      let dp = document.getElementById('dashboard-panel');
+      if (!dp) {
+        dp = document.createElement('div');
+        dp.id = 'dashboard-panel';
+        dp.className = 'panel span-full';
+        grid.appendChild(dp);
+      }
+      dp.innerHTML = `
+        <div class="panel-header">
+          <span class="panel-title">Network Dashboard</span>
+        </div>
+        <div style="padding: 1.5rem;">
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+            <div class="chain-stat" style="border: none; padding: 1rem;">
+              <div class="chain-stat-value teal" id="dash-round">${document.getElementById('health-round').textContent}</div>
+              <div class="chain-stat-label">Current Round</div>
+            </div>
+            <div class="chain-stat" style="border: none; padding: 1rem;">
+              <div class="chain-stat-value" id="dash-blocktime">${document.getElementById('health-blocktime').textContent}</div>
+              <div class="chain-stat-label">Avg Block Time</div>
+            </div>
+            <div class="chain-stat" style="border: none; padding: 1rem;">
+              <div class="chain-stat-value" id="dash-tps">${document.getElementById('health-tps').textContent}</div>
+              <div class="chain-stat-label">Estimated TPS</div>
+            </div>
+          </div>
+          <div style="color: var(--text-dim); font-size: 0.85rem; text-align: center; padding: 1rem;">
+            <p>The dashboard shows real-time network health metrics calculated from recent blocks.</p>
+            <p style="margin-top: 0.5rem;">Use the search bar to look up blocks, transactions, addresses, or ASA token IDs.</p>
+          </div>
+        </div>
+      `;
+      // Keep chart visible, hide block/txn panels
+      document.getElementById('blocks-panel').style.display = 'none';
+      document.getElementById('txns-panel').style.display = 'none';
+      document.getElementById('chart-panel').style.display = '';
+    }
+
+    // ── Network Health Banner ──
+
+    async function updateHealthBanner() {
       try {
-        const res = await fetch(`${ALGOD_API}/v2/status`);
-        const data = await res.json();
-        const round = data['last-round'];
-        document.getElementById('latest-round').textContent = formatNumber(round);
-        document.getElementById('block-time').textContent = '2.8s';
+        const statusRes = await fetch(`${ALGOD_API}/v2/status`);
+        const status = await statusRes.json();
+        const round = status['last-round'];
 
-        // Estimate TPS from recent blocks
-        document.getElementById('tps').textContent = '~15';
+        document.getElementById('health-round').textContent = round.toLocaleString();
 
-        return round;
+        // Fetch 5 recent blocks to calculate actual block time
+        const blockPromises = [];
+        for (let i = 0; i < 5; i++) {
+          blockPromises.push(
+            fetch(`${ALGOD_API}/v2/blocks/${round - i}`)
+              .then(r => r.json())
+              .catch(() => null)
+          );
+        }
+        const blocks = (await Promise.all(blockPromises)).filter(Boolean);
+
+        if (blocks.length >= 2) {
+          const timestamps = blocks.map(b => (b.block || b).ts).filter(Boolean).sort((a, b) => b - a);
+          if (timestamps.length >= 2) {
+            const timeDiffs = [];
+            for (let i = 0; i < timestamps.length - 1; i++) {
+              timeDiffs.push(timestamps[i] - timestamps[i + 1]);
+            }
+            const avgBlockTime = timeDiffs.reduce((a, b) => a + b, 0) / timeDiffs.length;
+            document.getElementById('health-blocktime').textContent = avgBlockTime.toFixed(1) + 's';
+            document.getElementById('block-time').textContent = avgBlockTime.toFixed(1) + 's';
+
+            // Calculate TPS from these blocks
+            let totalTxns = 0;
+            blocks.forEach(b => {
+              const blk = b.block || b;
+              totalTxns += blk.txns ? blk.txns.length : 0;
+            });
+            const tps = (totalTxns / (blocks.length * avgBlockTime)).toFixed(1);
+            document.getElementById('health-tps').textContent = tps;
+            document.getElementById('tps').textContent = '~' + tps;
+          }
+        }
+
+        const now = new Date();
+        document.getElementById('health-updated').textContent =
+          now.getHours().toString().padStart(2, '0') + ':' +
+          now.getMinutes().toString().padStart(2, '0') + ':' +
+          now.getSeconds().toString().padStart(2, '0');
+
       } catch (e) {
-        console.error('Status fetch failed:', e);
-        return null;
+        console.error('Health banner update failed:', e);
       }
     }
 
-    // Fetch latest blocks
+    // ── SVG Donut Chart ──
+
+    const TYPE_COLORS = {
+      'pay': '#10b981',
+      'axfer': '#6c5ce7',
+      'appl': '#00d2ff',
+      'acfg': '#f59e0b',
+      'afrz': '#ec4899',
+      'keyreg': '#f97316',
+      'stpf': '#8b5cf6'
+    };
+
+    const TYPE_LABELS = {
+      'pay': 'Payment',
+      'axfer': 'Asset Transfer',
+      'appl': 'App Call',
+      'acfg': 'Asset Config',
+      'afrz': 'Asset Freeze',
+      'keyreg': 'Key Registration',
+      'stpf': 'State Proof'
+    };
+
+    function renderDonutChart(txns) {
+      // Count types
+      const counts = {};
+      txns.forEach(txn => {
+        const type = txn['tx-type'] || 'unknown';
+        counts[type] = (counts[type] || 0) + 1;
+      });
+
+      const total = txns.length;
+      if (total === 0) {
+        document.getElementById('chart-area').innerHTML = '<div class="loading">No transaction data</div>';
+        return;
+      }
+
+      const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+
+      // Build SVG donut
+      const cx = 80, cy = 80, r = 60, strokeW = 24;
+      const circumference = 2 * Math.PI * r;
+      let offset = 0;
+      let paths = '';
+
+      entries.forEach(([type, count]) => {
+        const pct = count / total;
+        const dashLen = pct * circumference;
+        const color = TYPE_COLORS[type] || '#555';
+        paths += `<circle cx="${cx}" cy="${cy}" r="${r}"
+          fill="none" stroke="${color}" stroke-width="${strokeW}"
+          stroke-dasharray="${dashLen} ${circumference - dashLen}"
+          stroke-dashoffset="${-offset}"
+          transform="rotate(-90 ${cx} ${cy})"
+          style="transition: stroke-dasharray 0.5s ease"/>`;
+        offset += dashLen;
+      });
+
+      // Center text
+      const svg = `<svg class="chart-svg" width="160" height="160" viewBox="0 0 160 160">
+        ${paths}
+        <text x="${cx}" y="${cy - 6}" text-anchor="middle" fill="var(--text-bright)" font-size="18" font-weight="700" font-family="var(--mono)">${total}</text>
+        <text x="${cx}" y="${cy + 12}" text-anchor="middle" fill="var(--text-dim)" font-size="10" font-family="var(--sans)">transactions</text>
+      </svg>`;
+
+      // Legend
+      let legend = '';
+      entries.forEach(([type, count]) => {
+        const pct = ((count / total) * 100).toFixed(1);
+        const color = TYPE_COLORS[type] || '#555';
+        const label = TYPE_LABELS[type] || type;
+        legend += `<div class="legend-item">
+          <div class="legend-dot" style="background: ${color}"></div>
+          <span>${label}</span>
+          <span class="legend-count">${count} (${pct}%)</span>
+        </div>`;
+      });
+
+      document.getElementById('chart-area').innerHTML = `
+        <div class="chart-container">
+          ${svg}
+          <div class="chart-legend">${legend}</div>
+        </div>`;
+    }
+
+    // ── Fetch latest blocks ──
+
     async function fetchBlocks() {
       try {
         const statusRes = await fetch(`${ALGOD_API}/v2/status`);
@@ -753,10 +1437,11 @@
 
         document.getElementById('latest-round').textContent = formatNumber(latestRound);
 
-        const blocks = [];
         const promises = [];
+        navState.blockRounds = [];
         for (let i = 0; i < 8; i++) {
           const round = latestRound - i;
+          navState.blockRounds.push(round);
           promises.push(
             fetch(`${ALGOD_API}/v2/blocks/${round}`)
               .then(r => r.json())
@@ -777,27 +1462,26 @@
           const ts = block.ts || Math.floor(Date.now() / 1000);
           const proposer = block.prp || '';
 
-          container.innerHTML += `
-            <div class="block-row" onclick="showBlockDetail(${round})">
-              <div class="block-icon">&#x1F4E6;</div>
-              <div class="block-info">
-                <div class="block-number">#${round.toLocaleString()}</div>
-                <div class="block-meta">
-                  <span>Proposer: ${shortAddr(proposer)}</span>
-                </div>
-              </div>
-              <div class="block-right">
-                <div class="block-txns">${txnCount} txns</div>
-                <div class="block-time">${timeAgo(ts)}</div>
+          const row = document.createElement('div');
+          row.className = 'block-row';
+          row.setAttribute('data-round', round);
+          row.onclick = () => showBlockDetail(round);
+          row.innerHTML = `
+            <div class="block-icon">&#x1F4E6;</div>
+            <div class="block-info">
+              <div class="block-number">#${round.toLocaleString()}</div>
+              <div class="block-meta">
+                <span>Proposer: ${shortAddr(proposer)}</span>
               </div>
             </div>
+            <div class="block-right">
+              <div class="block-txns">${txnCount} txns</div>
+              <div class="block-time">${timeAgo(ts)}</div>
+            </div>
           `;
+          container.appendChild(row);
         });
 
-        // Calculate TPS
-        const avgTxns = totalTxns / 8;
-        const tps = (avgTxns / 2.8).toFixed(1);
-        document.getElementById('tps').textContent = '~' + tps;
       } catch (e) {
         console.error('Block fetch failed:', e);
         document.getElementById('blocks-list').innerHTML = '<div class="loading">Failed to load blocks. Retrying...</div>';
@@ -805,10 +1489,11 @@
       }
     }
 
-    // Fetch recent transactions from indexer
+    // ── Fetch recent transactions ──
+
     async function fetchTransactions() {
       try {
-        const res = await fetch(`${INDEXER_API}/v2/transactions?limit=8`);
+        const res = await fetch(`${INDEXER_API}/v2/transactions?limit=20`);
         const data = await res.json();
         const container = document.getElementById('txns-list');
         container.innerHTML = '';
@@ -818,28 +1503,23 @@
           return;
         }
 
-        // Estimate total
+        navState.recentTxns = data.transactions;
+        navState.txnIds = [];
+
         document.getElementById('total-txns').textContent = '10B+';
 
-        data.transactions.forEach(txn => {
+        // Only show first 8 in list, use all 20 for chart
+        const displayTxns = data.transactions.slice(0, 8);
+
+        displayTxns.forEach(txn => {
           const type = txn['tx-type'] || 'unknown';
-          const typeLabels = {
-            'pay': 'PAY',
-            'axfer': 'ASA',
-            'appl': 'APP',
-            'acfg': 'CFG',
-            'afrz': 'FRZ',
-            'keyreg': 'KEY',
-            'stpf': 'STP'
+          const typeLabelsShort = {
+            'pay': 'PAY', 'axfer': 'ASA', 'appl': 'APP',
+            'acfg': 'CFG', 'afrz': 'FRZ', 'keyreg': 'KEY', 'stpf': 'STP'
           };
           const typeIcons = {
-            'pay': '💸',
-            'axfer': '🪙',
-            'appl': '📱',
-            'acfg': '⚙️',
-            'afrz': '❄️',
-            'keyreg': '🔑',
-            'stpf': '📜'
+            'pay': '\u{1F4B8}', 'axfer': '\u{1FA99}', 'appl': '\u{1F4F1}',
+            'acfg': '\u2699\uFE0F', 'afrz': '\u2744\uFE0F', 'keyreg': '\u{1F511}', 'stpf': '\u{1F4DC}'
           };
 
           const amount = txn['payment-transaction']?.amount
@@ -851,27 +1531,36 @@
           const unit = isAlgo ? 'ALGO' : (type === 'axfer' ? 'ASA' : '');
           const ts = txn['round-time'] || Math.floor(Date.now() / 1000);
 
-          container.innerHTML += `
-            <div class="txn-row" onclick="showTxnDetail('${txn.id}')">
-              <div class="txn-icon ${type}">
-                ${typeIcons[type] || '📋'}
-              </div>
-              <div class="txn-info">
-                <div class="txn-hash">${shortHash(txn.id)}</div>
-                <div class="txn-addrs">
-                  <span class="txn-type ${type}">${typeLabels[type] || type}</span>
-                  <code>${shortAddr(txn.sender)}</code>
-                  &rarr;
-                  <code>${shortAddr(txn['payment-transaction']?.receiver || txn['asset-transfer-transaction']?.receiver || '...')}</code>
-                </div>
-              </div>
-              <div class="txn-right">
-                <div class="txn-amount">${displayAmount} <span class="unit">${unit}</span></div>
-                <div class="txn-time">${timeAgo(ts)}</div>
+          navState.txnIds.push(txn.id);
+
+          const row = document.createElement('div');
+          row.className = 'txn-row';
+          row.setAttribute('data-txid', txn.id);
+          row.onclick = () => showTxnDetail(txn.id);
+          row.innerHTML = `
+            <div class="txn-icon ${type}">
+              ${typeIcons[type] || '\u{1F4CB}'}
+            </div>
+            <div class="txn-info">
+              <div class="txn-hash">${shortHash(txn.id)}</div>
+              <div class="txn-addrs">
+                <span class="txn-type ${type}">${typeLabelsShort[type] || type}</span>
+                <code>${shortAddr(txn.sender)}</code>
+                &rarr;
+                <code>${shortAddr(txn['payment-transaction']?.receiver || txn['asset-transfer-transaction']?.receiver || '...')}</code>
               </div>
             </div>
+            <div class="txn-right">
+              <div class="txn-amount">${displayAmount} <span class="unit">${unit}</span></div>
+              <div class="txn-time">${timeAgo(ts)}</div>
+            </div>
           `;
+          container.appendChild(row);
         });
+
+        // Render chart with all 20 txns
+        renderDonutChart(data.transactions);
+
       } catch (e) {
         console.error('Txn fetch failed:', e);
         document.getElementById('txns-list').innerHTML = '<div class="loading">Failed to load transactions. Retrying...</div>';
@@ -879,7 +1568,8 @@
       }
     }
 
-    // Show block detail
+    // ── Show block detail (with actual transactions) ──
+
     async function showBlockDetail(round) {
       const overlay = document.getElementById('detail-overlay');
       const panel = document.getElementById('detail-panel');
@@ -890,8 +1580,57 @@
         const res = await fetch(`${ALGOD_API}/v2/blocks/${round}`);
         const data = await res.json();
         const block = data.block || data;
-        const txnCount = block.txns ? block.txns.length : 0;
+        const txns = block.txns || [];
+        const txnCount = txns.length;
         const ts = block.ts ? new Date(block.ts * 1000).toISOString() : 'N/A';
+        const proposer = block.prp || 'N/A';
+
+        // Build transactions list
+        let txnListHtml = '';
+        if (txnCount > 0) {
+          txnListHtml = `<div class="detail-section">Transactions (${txnCount})</div>`;
+          const maxShow = Math.min(txnCount, 25);
+          for (let i = 0; i < maxShow; i++) {
+            const txn = txns[i];
+            const txnType = txn.type || txn.txn?.type || 'unknown';
+            const typeMap = { 'pay': 'PAY', 'axfer': 'ASA', 'appl': 'APP', 'acfg': 'CFG', 'afrz': 'FRZ', 'keyreg': 'KEY', 'stpf': 'STP' };
+            const typeLabel = typeMap[txnType] || txnType.toUpperCase();
+            const typeColorClass = txnType;
+
+            // Extract sender from txn structure (algod raw format)
+            const snd = txn.txn?.snd || txn.snd || '';
+            const senderDisplay = snd ? shortAddr(snd) : '???';
+
+            // Extract amount
+            let amt = 0;
+            let amtDisplay = '';
+            if (txnType === 'pay') {
+              amt = txn.txn?.amt || txn.amt || 0;
+              amtDisplay = microAlgoToAlgo(amt) + ' ALGO';
+            } else if (txnType === 'axfer') {
+              amt = txn.txn?.aamt || txn.aamt || 0;
+              amtDisplay = formatNumber(amt) + ' ASA';
+            } else if (txnType === 'appl') {
+              const appId = txn.txn?.apid || txn.apid || 0;
+              amtDisplay = appId ? 'App #' + appId : 'Create';
+            } else {
+              amtDisplay = '--';
+            }
+
+            txnListHtml += `
+              <div class="block-txn-item">
+                <span class="block-txn-type txn-type ${typeColorClass}">${typeLabel}</span>
+                <span class="block-txn-sender">${senderDisplay}</span>
+                <span class="block-txn-amount">${amtDisplay}</span>
+              </div>`;
+          }
+          if (txnCount > maxShow) {
+            txnListHtml += `<div style="padding: 0.5rem 0; font-size: 0.75rem; color: var(--text-dim); text-align: center;">... and ${txnCount - maxShow} more transactions</div>`;
+          }
+        } else {
+          txnListHtml = `<div class="detail-section">Transactions</div>
+            <div style="padding: 0.5rem 0; font-size: 0.8rem; color: var(--text-dim);">No transactions in this block.</div>`;
+        }
 
         panel.innerHTML = `
           <div class="detail-header">
@@ -912,27 +1651,26 @@
           </div>
           <div class="detail-row">
             <span class="detail-key">Proposer</span>
-            <span class="detail-val">${block.prp || 'N/A'}</span>
+            <span class="detail-val">${proposer} ${proposer !== 'N/A' ? copyBtnHtml(proposer) : ''}</span>
           </div>
           <div class="detail-row">
             <span class="detail-key">Genesis Hash</span>
-            <span class="detail-val">${block.gh || 'N/A'}</span>
+            <span class="detail-val" style="max-width: 250px;">${block.gh || 'N/A'}</span>
           </div>
-          <div class="detail-row">
-            <span class="detail-key">Previous Block</span>
-            <span class="detail-val">${block.prev || 'N/A'}</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-key">Seed</span>
-            <span class="detail-val">${block.seed || 'N/A'}</span>
-          </div>
+          ${txnListHtml}
         `;
       } catch (e) {
-        panel.innerHTML = '<div class="loading">Failed to load block details</div>';
+        panel.innerHTML = `
+          <div class="detail-header">
+            <div class="detail-title">Block #${round.toLocaleString()}</div>
+            <button class="detail-close" onclick="closeDetail()">&times;</button>
+          </div>
+          <div class="loading">Failed to load block details</div>`;
       }
     }
 
-    // Show transaction detail
+    // ── Show transaction detail (with copy buttons) ──
+
     async function showTxnDetail(txId) {
       const overlay = document.getElementById('detail-overlay');
       const panel = document.getElementById('detail-panel');
@@ -946,15 +1684,15 @@
 
         const type = txn['tx-type'] || 'unknown';
         const amount = txn['payment-transaction']?.amount || txn['asset-transfer-transaction']?.amount || 0;
-        const isAlgo = type === 'pay';
         const ts = txn['round-time'] ? new Date(txn['round-time'] * 1000).toISOString() : 'N/A';
 
         let extraRows = '';
         if (type === 'pay') {
+          const receiver = txn['payment-transaction']?.receiver || 'N/A';
           extraRows = `
             <div class="detail-row">
               <span class="detail-key">Receiver</span>
-              <span class="detail-val">${txn['payment-transaction']?.receiver || 'N/A'}</span>
+              <span class="detail-val">${receiver} ${receiver !== 'N/A' ? copyBtnHtml(receiver) : ''}</span>
             </div>
             <div class="detail-row">
               <span class="detail-key">Amount</span>
@@ -962,14 +1700,16 @@
             </div>
           `;
         } else if (type === 'axfer') {
+          const receiver = txn['asset-transfer-transaction']?.receiver || 'N/A';
+          const assetId = txn['asset-transfer-transaction']?.['asset-id'] || 'N/A';
           extraRows = `
             <div class="detail-row">
               <span class="detail-key">Receiver</span>
-              <span class="detail-val">${txn['asset-transfer-transaction']?.receiver || 'N/A'}</span>
+              <span class="detail-val">${receiver} ${receiver !== 'N/A' ? copyBtnHtml(receiver) : ''}</span>
             </div>
             <div class="detail-row">
               <span class="detail-key">Asset ID</span>
-              <span class="detail-val">${txn['asset-transfer-transaction']?.['asset-id'] || 'N/A'}</span>
+              <span class="detail-val"><a style="color: var(--accent); cursor: pointer;" onclick="event.stopPropagation(); closeDetail(); showAsaDetail(${assetId})">${assetId}</a></span>
             </div>
             <div class="detail-row">
               <span class="detail-key">Amount</span>
@@ -989,6 +1729,17 @@
           `;
         }
 
+        let noteDisplay = 'N/A';
+        if (txn.note) {
+          try {
+            noteDisplay = atob(txn.note).substring(0, 80);
+            // Sanitize to prevent XSS
+            noteDisplay = noteDisplay.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          } catch {
+            noteDisplay = '(binary data)';
+          }
+        }
+
         panel.innerHTML = `
           <div class="detail-header">
             <div class="detail-title">Transaction</div>
@@ -996,15 +1747,15 @@
           </div>
           <div class="detail-row">
             <span class="detail-key">ID</span>
-            <span class="detail-val">${txId}</span>
+            <span class="detail-val" style="max-width: 350px;">${txId} ${copyBtnHtml(txId)}</span>
           </div>
           <div class="detail-row">
             <span class="detail-key">Type</span>
-            <span class="detail-val">${type.toUpperCase()}</span>
+            <span class="detail-val"><span class="txn-type ${type}" style="font-size: 0.72rem;">${type.toUpperCase()}</span></span>
           </div>
           <div class="detail-row">
             <span class="detail-key">Sender</span>
-            <span class="detail-val">${txn.sender || 'N/A'}</span>
+            <span class="detail-val">${txn.sender || 'N/A'} ${txn.sender ? copyBtnHtml(txn.sender) : ''}</span>
           </div>
           ${extraRows}
           <div class="detail-row">
@@ -1021,7 +1772,7 @@
           </div>
           <div class="detail-row">
             <span class="detail-key">Note</span>
-            <span class="detail-val">${txn.note ? atob(txn.note).substring(0, 50) : 'N/A'}</span>
+            <span class="detail-val">${noteDisplay}</span>
           </div>
         `;
       } catch (e) {
@@ -1035,29 +1786,102 @@
       }
     }
 
-    function closeDetail() {
-      document.getElementById('detail-overlay').classList.remove('active');
-    }
+    // ── Show ASA detail ──
 
-    // Search handler
-    async function handleSearch() {
-      const query = document.getElementById('search-input').value.trim();
-      if (!query) return;
+    async function showAsaDetail(assetId) {
+      const overlay = document.getElementById('detail-overlay');
+      const panel = document.getElementById('detail-panel');
+      overlay.classList.add('active');
+      panel.innerHTML = '<div class="loading"><div class="spinner"></div>Loading ASA info...</div>';
 
-      // Detect what we're searching for
-      if (/^\d+$/.test(query)) {
-        // Block number
-        showBlockDetail(parseInt(query));
-      } else if (query.length === 52 || query.length === 58) {
-        // Algorand address
-        showAccountDetail(query);
-      } else if (query.length > 40) {
-        // Transaction ID
-        showTxnDetail(query);
-      } else {
-        alert('Enter a block number, transaction ID, or Algorand address');
+      try {
+        const res = await fetch(`${INDEXER_API}/v2/assets/${assetId}`);
+        const data = await res.json();
+        const asset = data.asset;
+        const params = asset.params || {};
+
+        const name = params.name || 'Unnamed Asset';
+        const unitName = params['unit-name'] || '--';
+        const total = params.total || 0;
+        const decimals = params.decimals || 0;
+        const creator = params.creator || 'N/A';
+        const url = params.url || '';
+        const frozen = params['default-frozen'] ? 'Yes' : 'No';
+        const clawback = params.clawback || 'N/A';
+        const freeze = params.freeze || 'N/A';
+        const manager = params.manager || 'N/A';
+        const reserve = params.reserve || 'N/A';
+
+        panel.innerHTML = `
+          <div class="detail-header">
+            <div class="detail-title">ASA Token</div>
+            <button class="detail-close" onclick="closeDetail()">&times;</button>
+          </div>
+          <div class="asa-card">
+            <div class="asa-name">${name.replace(/</g, '&lt;').replace(/>/g, '&gt;')} <span class="asa-id-badge">ID: ${assetId}</span></div>
+            <div class="asa-unit">${unitName.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">Asset ID</span>
+            <span class="detail-val">${assetId} ${copyBtnHtml(assetId.toString())}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">Name</span>
+            <span class="detail-val">${name.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">Unit Name</span>
+            <span class="detail-val">${unitName.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">Total Supply</span>
+            <span class="detail-val">${formatSupply(total, decimals)} ${unitName.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">Decimals</span>
+            <span class="detail-val">${decimals}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">Creator</span>
+            <span class="detail-val">${creator} ${creator !== 'N/A' ? copyBtnHtml(creator) : ''}</span>
+          </div>
+          ${url ? `<div class="detail-row">
+            <span class="detail-key">URL</span>
+            <span class="detail-val"><a href="${url.replace(/"/g, '&quot;')}" target="_blank" rel="noopener" style="color: var(--algo-teal); text-decoration: none;">${url.length > 50 ? url.substring(0, 50) + '...' : url}</a></span>
+          </div>` : ''}
+          <div class="detail-row">
+            <span class="detail-key">Default Frozen</span>
+            <span class="detail-val">${frozen}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">Manager</span>
+            <span class="detail-val" style="max-width: 280px;">${shortAddr(manager)} ${manager !== 'N/A' ? copyBtnHtml(manager) : ''}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">Reserve</span>
+            <span class="detail-val" style="max-width: 280px;">${shortAddr(reserve)} ${reserve !== 'N/A' ? copyBtnHtml(reserve) : ''}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">Freeze</span>
+            <span class="detail-val" style="max-width: 280px;">${shortAddr(freeze)} ${freeze !== 'N/A' ? copyBtnHtml(freeze) : ''}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">Clawback</span>
+            <span class="detail-val" style="max-width: 280px;">${shortAddr(clawback)} ${clawback !== 'N/A' ? copyBtnHtml(clawback) : ''}</span>
+          </div>
+        `;
+      } catch (e) {
+        panel.innerHTML = `
+          <div class="detail-header">
+            <div class="detail-title">ASA Token</div>
+            <button class="detail-close" onclick="closeDetail()">&times;</button>
+          </div>
+          <div class="loading">Asset not found or API error. ID: ${assetId}</div>
+        `;
       }
     }
+
+    // ── Show account detail (with ASA holdings + recent txns) ──
 
     async function showAccountDetail(address) {
       const overlay = document.getElementById('detail-overlay');
@@ -1066,14 +1890,67 @@
       panel.innerHTML = '<div class="loading"><div class="spinner"></div>Loading account...</div>';
 
       try {
-        const res = await fetch(`${ALGOD_API}/v2/accounts/${address}`);
-        const data = await res.json();
+        // Fetch account info and recent transactions in parallel
+        const [accountRes, txnRes] = await Promise.all([
+          fetch(`${ALGOD_API}/v2/accounts/${address}`).then(r => r.json()),
+          fetch(`${INDEXER_API}/v2/accounts/${address}/transactions?limit=10`).then(r => r.json()).catch(() => null)
+        ]);
 
+        const data = accountRes;
         const balance = data.amount || 0;
         const minBalance = data['min-balance'] || 0;
-        const assets = data.assets ? data.assets.length : 0;
+        const assets = data.assets || [];
         const apps = data['apps-local-state'] ? data['apps-local-state'].length : 0;
         const createdApps = data['created-apps'] ? data['created-apps'].length : 0;
+
+        // Build ASA holdings
+        let holdingsHtml = '';
+        if (assets.length > 0) {
+          holdingsHtml = `<div class="detail-section">ASA Holdings (${assets.length})</div>`;
+          holdingsHtml += '<div class="holdings-list">';
+          const maxHoldings = Math.min(assets.length, 30);
+          for (let i = 0; i < maxHoldings; i++) {
+            const a = assets[i];
+            const assetId = a['asset-id'];
+            const amount = a.amount || 0;
+            holdingsHtml += `
+              <div class="holding-row">
+                <div class="holding-name">
+                  <a style="color: var(--accent); cursor: pointer; text-decoration: none;" onclick="closeDetail(); setTimeout(() => showAsaDetail(${assetId}), 200)">
+                    ASA <span class="asa-id-sm">#${assetId}</span>
+                  </a>
+                </div>
+                <div class="holding-amount">${formatNumber(amount)}</div>
+              </div>`;
+          }
+          if (assets.length > maxHoldings) {
+            holdingsHtml += `<div style="padding: 0.4rem 0; font-size: 0.72rem; color: var(--text-dim); text-align: center;">... and ${assets.length - maxHoldings} more assets</div>`;
+          }
+          holdingsHtml += '</div>';
+        }
+
+        // Build recent transactions
+        let recentTxnHtml = '';
+        if (txnRes && txnRes.transactions && txnRes.transactions.length > 0) {
+          recentTxnHtml = `<div class="detail-section">Recent Transactions (${txnRes.transactions.length})</div>`;
+          txnRes.transactions.forEach(txn => {
+            const type = txn['tx-type'] || 'unknown';
+            const typeMap = { 'pay': 'PAY', 'axfer': 'ASA', 'appl': 'APP', 'acfg': 'CFG', 'afrz': 'FRZ', 'keyreg': 'KEY', 'stpf': 'STP' };
+            const typeLabel = typeMap[type] || type.toUpperCase();
+            const amt = txn['payment-transaction']?.amount || txn['asset-transfer-transaction']?.amount || 0;
+            const isAlgo = type === 'pay';
+            const amtDisplay = isAlgo ? microAlgoToAlgo(amt) + ' ALGO' : formatNumber(amt) + (type === 'axfer' ? ' ASA' : '');
+            const ts = txn['round-time'] ? timeAgo(txn['round-time']) : '';
+
+            recentTxnHtml += `
+              <div class="block-txn-item" style="cursor: pointer;" onclick="showTxnDetail('${txn.id}')">
+                <span class="block-txn-type txn-type ${type}">${typeLabel}</span>
+                <span class="block-txn-sender" title="${txn.id}">${shortHash(txn.id)}</span>
+                <span class="block-txn-amount">${amtDisplay}</span>
+                <span style="font-size: 0.68rem; color: var(--text-dim); flex-shrink: 0; margin-left: 0.5rem;">${ts}</span>
+              </div>`;
+          });
+        }
 
         panel.innerHTML = `
           <div class="detail-header">
@@ -1082,7 +1959,13 @@
           </div>
           <div class="account-info">
             <div class="account-balance">${microAlgoToAlgo(balance)} ALGO</div>
-            <div class="account-addr">${address}</div>
+            <div class="account-addr">
+              <span>${address}</span>
+              ${copyBtnHtml(address)}
+            </div>
+            <div style="margin-top: -0.5rem; margin-bottom: 0.5rem;">
+              <a href="https://allo.info/account/${address}" target="_blank" rel="noopener" style="font-size: 0.78rem; color: var(--algo-teal); text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem;">View on Allo.info <span style="font-size: 0.7rem;">&nearr;</span></a>
+            </div>
           </div>
           <div class="detail-row">
             <span class="detail-key">Balance</span>
@@ -1094,7 +1977,7 @@
           </div>
           <div class="detail-row">
             <span class="detail-key">Assets Held</span>
-            <span class="detail-val">${assets}</span>
+            <span class="detail-val">${assets.length}</span>
           </div>
           <div class="detail-row">
             <span class="detail-key">Apps Opted In</span>
@@ -1108,6 +1991,8 @@
             <span class="detail-key">Status</span>
             <span class="detail-val">${data.status || 'Online'}</span>
           </div>
+          ${holdingsHtml}
+          ${recentTxnHtml}
         `;
       } catch (e) {
         panel.innerHTML = `
@@ -1120,22 +2005,174 @@
       }
     }
 
-    // Keyboard shortcut
+    function closeDetail() {
+      document.getElementById('detail-overlay').classList.remove('active');
+    }
+
+    // ── Search handler ──
+
+    async function handleSearch() {
+      const query = document.getElementById('search-input').value.trim();
+      if (!query) return;
+
+      if (/^\d+$/.test(query)) {
+        const num = parseInt(query);
+        // Heuristic: if the number is reasonably small for an ASA ID and way below
+        // current round, try ASA lookup. But large numbers could be blocks too.
+        // We try to determine context: if the number is below 10 billion and above
+        // the current round, it's likely an ASA. If ambiguous, try ASA first and
+        // fall back to block.
+        const currentRound = parseInt(document.getElementById('health-round').textContent.replace(/,/g, '')) || 0;
+
+        if (num <= currentRound && currentRound > 0) {
+          // Could be a block or ASA. If the number is < 2 billion, try ASA first.
+          // Algorand ASA IDs are generally smaller numbers.
+          if (num < 2_000_000_000) {
+            // Try ASA first, fall back to block
+            try {
+              const asaRes = await fetch(`${INDEXER_API}/v2/assets/${num}`);
+              if (asaRes.ok) {
+                const asaData = await asaRes.json();
+                if (asaData.asset) {
+                  showAsaDetail(num);
+                  return;
+                }
+              }
+            } catch {}
+            // Fall back to block
+            showBlockDetail(num);
+          } else {
+            // Large number, likely a block round
+            showBlockDetail(num);
+          }
+        } else if (currentRound === 0) {
+          // No current round info yet; try ASA then block
+          try {
+            const asaRes = await fetch(`${INDEXER_API}/v2/assets/${num}`);
+            if (asaRes.ok) {
+              const asaData = await asaRes.json();
+              if (asaData.asset) {
+                showAsaDetail(num);
+                return;
+              }
+            }
+          } catch {}
+          showBlockDetail(num);
+        } else {
+          // Number is above current round: must be ASA
+          showAsaDetail(num);
+        }
+      } else if (query.length === 52 || query.length === 58) {
+        // Algorand address
+        showAccountDetail(query);
+      } else if (query.length > 40) {
+        // Transaction ID
+        showTxnDetail(query);
+      } else {
+        showToast('Enter a block number, txn ID, address, or ASA ID');
+      }
+    }
+
+    // ── Keyboard navigation ──
+
+    function clearFocus() {
+      document.querySelectorAll('.block-row.focused, .txn-row.focused').forEach(el => el.classList.remove('focused'));
+    }
+
+    function getFocusableRows() {
+      if (navState.panel === 'blocks') {
+        return document.querySelectorAll('#blocks-list .block-row');
+      } else {
+        return document.querySelectorAll('#txns-list .txn-row');
+      }
+    }
+
+    function focusCurrent() {
+      clearFocus();
+      const rows = getFocusableRows();
+      if (navState.index >= 0 && navState.index < rows.length) {
+        rows[navState.index].classList.add('focused');
+        rows[navState.index].scrollIntoView({ block: 'nearest' });
+      }
+    }
+
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') closeDetail();
-      if (e.key === '/' && document.activeElement !== document.getElementById('search-input')) {
+      const isSearchFocused = document.activeElement === document.getElementById('search-input');
+      const isOverlayOpen = document.getElementById('detail-overlay').classList.contains('active');
+
+      // Escape: close detail or blur search
+      if (e.key === 'Escape') {
+        if (isOverlayOpen) {
+          closeDetail();
+        } else if (isSearchFocused) {
+          document.getElementById('search-input').blur();
+        }
+        return;
+      }
+
+      // '/' to focus search
+      if (e.key === '/' && !isSearchFocused && !isOverlayOpen) {
         e.preventDefault();
         document.getElementById('search-input').focus();
+        return;
+      }
+
+      // Arrow keys and Enter for navigation (only when not in search and no overlay)
+      if (isSearchFocused || isOverlayOpen) return;
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        const rows = getFocusableRows();
+        if (rows.length === 0) return;
+        navState.index = Math.min(navState.index + 1, rows.length - 1);
+        focusCurrent();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (navState.index > 0) {
+          navState.index--;
+          focusCurrent();
+        } else if (navState.index === 0) {
+          navState.index = -1;
+          clearFocus();
+        }
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        navState.panel = 'blocks';
+        navState.index = navState.index >= 0 ? 0 : -1;
+        clearFocus();
+        if (navState.index >= 0) focusCurrent();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        navState.panel = 'txns';
+        navState.index = navState.index >= 0 ? 0 : -1;
+        clearFocus();
+        if (navState.index >= 0) focusCurrent();
+      } else if (e.key === 'Enter') {
+        if (navState.index >= 0) {
+          e.preventDefault();
+          if (navState.panel === 'blocks' && navState.blockRounds[navState.index] !== undefined) {
+            showBlockDetail(navState.blockRounds[navState.index]);
+          } else if (navState.panel === 'txns' && navState.txnIds[navState.index] !== undefined) {
+            showTxnDetail(navState.txnIds[navState.index]);
+          }
+        }
       }
     });
 
-    // Init
-    fetchBlocks();
-    fetchTransactions();
+    // ── Initialize ──
 
-    // Auto-refresh every 5 seconds
+    async function init() {
+      await updateHealthBanner();
+      fetchBlocks();
+      fetchTransactions();
+    }
+
+    init();
+
+    // Auto-refresh
     setInterval(fetchBlocks, 5000);
     setInterval(fetchTransactions, 10000);
+    setInterval(updateHealthBanner, 4000);
   </script>
 </body>
 </html>
