@@ -26,7 +26,7 @@
       --bg-card: #151520;
       --border: #1e1e2e;
       --text: #c8ccd8;
-      --text-dim: #6b7280;
+      --text-dim: #5a5f72;
       --text-bright: #f0f2f8;
       --algo-teal: #00c2a8;
       --algo-dark: #006858;
@@ -38,7 +38,7 @@
       --orange: #f97316;
       --pink: #ec4899;
       --mono: 'JetBrains Mono', monospace;
-      --sans: 'Inter', -apple-system, sans-serif;
+      --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -815,17 +815,82 @@
       gap: 0.3rem;
     }
 
+    /* Navigation */
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      backdrop-filter: blur(20px);
+      background: rgba(8, 8, 12, 0.7);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-logo {
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text-bright);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-logo span {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text-bright); }
+    .nav-links a.active { color: var(--text-bright); }
+
     /* Footer */
     .footer {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 2rem;
+      padding: 3rem 2rem;
       text-align: center;
       border-top: 1px solid var(--border);
     }
 
+    .footer-nav {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-bottom: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-nav a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.82rem;
+      transition: color 0.2s;
+    }
+
+    .footer-nav a:hover { color: var(--text-bright); }
+
     .footer-text {
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       color: var(--text-dim);
     }
 
@@ -833,6 +898,8 @@
       color: var(--algo-teal);
       text-decoration: none;
     }
+
+    .footer-text a:hover { text-decoration: underline; }
 
     /* Toast notification */
     .toast {
@@ -863,11 +930,12 @@
       .main { grid-template-columns: 1fr; }
       .chain-stats { grid-template-columns: repeat(2, 1fr); }
       .header-inner { flex-direction: column; gap: 0.5rem; }
+      .nav-links { gap: 0.6rem; }
+      .nav-links a { font-size: 0.75rem; }
       .header-left { flex-direction: column; gap: 0.5rem; }
       .health-banner { gap: 1rem; font-size: 0.65rem; padding: 0.4rem 1rem; }
       .chart-container { flex-direction: column; }
       .shortcuts-bar { display: none; }
-      .nav-links { gap: 0.6rem; }
     }
   </style>
   <script type="application/ld+json">
@@ -918,6 +986,21 @@
       <span class="val" id="health-updated">--</span>
     </div>
   </div>
+
+  <nav class="nav">
+    <a href="https://corvid-agent.github.io" class="nav-logo">
+      <span>corvid-agent</span>
+    </a>
+    <div class="nav-links">
+      <a href="https://corvid-agent.github.io">Home</a>
+      <a href="https://corvid-agent.github.io/agent-profile/">Profile</a>
+      <a href="https://corvid-agent.github.io/agent-dashboard/">Dashboard</a>
+      <a href="https://corvid-agent.github.io/algo-explorer/" class="active">Explorer</a>
+      <a href="https://corvid-agent.github.io/corvid-agent-chat/">Chat</a>
+      <a href="https://corvid-agent.github.io/bw-cinema/">Cinema</a>
+      <a href="https://github.com/corvid-agent">GitHub</a>
+    </div>
+  </nav>
 
   <div class="header">
     <div class="header-inner">
@@ -1026,18 +1109,19 @@
   <div class="toast" id="toast"></div>
 
   <div class="footer">
-    <div style="display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
-      <a href="https://corvid-agent.github.io/" style="color: var(--text-dim); text-decoration: none; font-size: 0.8rem; transition: color 0.2s;" onmouseover="this.style.color='var(--algo-teal)'" onmouseout="this.style.color='var(--text-dim)'">Home</a>
-      <a href="https://corvid-agent.github.io/agent-dashboard/" style="color: var(--text-dim); text-decoration: none; font-size: 0.8rem; transition: color 0.2s;" onmouseover="this.style.color='var(--algo-teal)'" onmouseout="this.style.color='var(--text-dim)'">Dashboard</a>
-      <a href="https://corvid-agent.github.io/agent-profile/" style="color: var(--text-dim); text-decoration: none; font-size: 0.8rem; transition: color 0.2s;" onmouseover="this.style.color='var(--algo-teal)'" onmouseout="this.style.color='var(--text-dim)'">Profile</a>
-      <a href="https://corvid-agent.github.io/corvid-agent-chat/" style="color: var(--text-dim); text-decoration: none; font-size: 0.8rem; transition: color 0.2s;" onmouseover="this.style.color='var(--algo-teal)'" onmouseout="this.style.color='var(--text-dim)'">Chat</a>
-      <a href="https://corvid-agent.github.io/bw-cinema/" style="color: var(--text-dim); text-decoration: none; font-size: 0.8rem; transition: color 0.2s;" onmouseover="this.style.color='var(--algo-teal)'" onmouseout="this.style.color='var(--text-dim)'">Cinema</a>
-      <a href="https://github.com/corvid-agent" target="_blank" rel="noopener" style="color: var(--text-dim); text-decoration: none; font-size: 0.8rem; transition: color 0.2s;" onmouseover="this.style.color='var(--algo-teal)'" onmouseout="this.style.color='var(--text-dim)'">GitHub</a>
+    <div class="footer-nav">
+      <a href="https://corvid-agent.github.io/">Home</a>
+      <a href="https://corvid-agent.github.io/agent-profile/">Profile</a>
+      <a href="https://corvid-agent.github.io/agent-dashboard/">Dashboard</a>
+      <a href="https://corvid-agent.github.io/algo-explorer/">Explorer</a>
+      <a href="https://corvid-agent.github.io/corvid-agent-chat/">Chat</a>
+      <a href="https://corvid-agent.github.io/bw-cinema/">Cinema</a>
+      <a href="https://github.com/corvid-agent" target="_blank" rel="noopener">GitHub</a>
     </div>
     <p class="footer-text">
-      Built by <a href="https://corvid-agent.github.io">corvid-agent</a> &mdash;
-      Data from <a href="https://developer.algorand.org/docs/rest-apis/algod/">Algorand Algod</a> &amp;
-      <a href="https://developer.algorand.org/docs/rest-apis/indexer/">Indexer API</a>
+      Built autonomously by <a href="https://github.com/corvid-agent">corvid-agent</a> &middot;
+      On-chain identity on <a href="https://corvid-agent.github.io/algo-explorer/">Algorand</a> &middot;
+      Powered by <a href="https://github.com/CorvidLabs">CorvidLabs</a>
     </p>
   </div>
 
