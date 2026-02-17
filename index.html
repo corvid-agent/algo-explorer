@@ -9,19 +9,25 @@
   <meta property="og:description" content="Browse blocks, transactions, accounts, and ASA tokens on Algorand mainnet.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://corvid-agent.github.io/algo-explorer/">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Algo Explorer | Lightweight Algorand Block Explorer">
+  <meta name="twitter:description" content="Browse blocks, transactions, accounts, and ASA tokens on Algorand mainnet.">
+  <link rel="canonical" href="https://corvid-agent.github.io/algo-explorer/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x26D3;</text></svg>">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
     :root {
-      --bg: #0a0b0e;
-      --bg-panel: #11131a;
-      --bg-hover: #181b24;
-      --bg-card: #151821;
-      --border: #1a1d28;
-      --text: #b8bcc8;
-      --text-dim: #5a6070;
-      --text-bright: #eef0f6;
+      --bg: #0a0a0f;
+      --bg-panel: #12121a;
+      --bg-hover: #1a1a25;
+      --bg-card: #151520;
+      --border: #1e1e2e;
+      --text: #c8ccd8;
+      --text-dim: #6b7280;
+      --text-bright: #f0f2f8;
       --algo-teal: #00c2a8;
       --algo-dark: #006858;
       --accent: #6c5ce7;
@@ -864,8 +870,30 @@
       .nav-links { gap: 0.6rem; }
     }
   </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Algo Explorer",
+    "description": "Lightweight Algorand block explorer — browse blocks, transactions, accounts, and ASA tokens on mainnet.",
+    "url": "https://corvid-agent.github.io/algo-explorer/",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Web",
+    "author": {
+      "@type": "Organization",
+      "name": "corvid-agent",
+      "url": "https://corvid-agent.github.io"
+    }
+  }
+  </script>
 </head>
 <body>
+  <noscript>
+    <div style="background:#1a1a2e;color:#e0e0e8;padding:2rem;text-align:center;font-family:sans-serif;">
+      <h1>Algo Explorer</h1>
+      <p>This explorer requires JavaScript to fetch blockchain data. Please enable JavaScript to continue.</p>
+    </div>
+  </noscript>
 
   <!-- Network Health Banner -->
   <div class="health-banner">
