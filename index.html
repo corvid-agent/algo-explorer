@@ -2163,10 +2163,24 @@
 
     // ── Initialize ──
 
+    function handleUrlParams() {
+      const params = new URLSearchParams(window.location.search);
+      const tx = params.get('tx');
+      const addr = params.get('addr') || params.get('address');
+      const block = params.get('block');
+      const asa = params.get('asa') || params.get('asset');
+      if (tx) { showTxnDetail(tx); return true; }
+      if (addr) { showAccountDetail(addr); return true; }
+      if (block && /^\d+$/.test(block)) { showBlockDetail(parseInt(block)); return true; }
+      if (asa && /^\d+$/.test(asa)) { showAsaDetail(parseInt(asa)); return true; }
+      return false;
+    }
+
     async function init() {
       await updateHealthBanner();
       fetchBlocks();
       fetchTransactions();
+      handleUrlParams();
     }
 
     init();
