@@ -1872,6 +1872,33 @@
             <span class="detail-val" style="max-width: 280px;">${shortAddr(clawback)} ${clawback !== 'N/A' ? copyBtnHtml(clawback) : ''}</span>
           </div>
         `;
+
+        // Fetch recent transfers for this ASA
+        try {
+          const txnRes = await fetch(`${INDEXER_API}/v2/transactions?asset-id=${assetId}&tx-type=axfer&limit=10`);
+          const txnData = await txnRes.json();
+          const txns = txnData.transactions || [];
+          if (txns.length > 0) {
+            let transfersHtml = '<div class="detail-section" style="margin-top: var(--space-lg);">Recent Transfers</div>';
+            for (const txn of txns) {
+              const sender = txn.sender || 'N/A';
+              const receiver = txn['asset-transfer-transaction']?.receiver || 'N/A';
+              const amount = txn['asset-transfer-transaction']?.amount || 0;
+              const fmtAmt = formatSupply(amount, decimals);
+              const ts = txn['round-time'] ? new Date(txn['round-time'] * 1000).toLocaleString() : '';
+              const txId = txn.id || '';
+              transfersHtml += `
+                <div class="block-txn-item" style="cursor:pointer;" onclick="showTxnDetail('${txId}')">
+                  <span class="block-txn-type axfer">axfer</span>
+                  <span class="block-txn-sender" title="${sender}">${shortAddr(sender)} → ${shortAddr(receiver)}</span>
+                  <span class="block-txn-amount">${fmtAmt} ${unitName.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
+                </div>`;
+            }
+            panel.innerHTML += transfersHtml;
+          }
+        } catch (e) {
+          // Silently skip transfers on error
+        }
       } catch (e) {
         panel.innerHTML = `
           <div class="detail-header">
