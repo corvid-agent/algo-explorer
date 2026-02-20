@@ -98,7 +98,7 @@ test.describe('App loading and layout', () => {
   test('shows the health banner with live indicator', async ({ page }) => {
     const banner = page.locator('.health-banner');
     await expect(banner).toBeVisible();
-    await expect(page.locator('.live-dot')).toBeVisible();
+    await expect(page.locator('.health-banner .live-dot')).toBeVisible();
   });
 
   test('displays health banner stats after API loads', async ({ page }) => {

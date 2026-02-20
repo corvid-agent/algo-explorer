@@ -1339,7 +1339,7 @@
     }
 
     function copyBtnHtml(text) {
-      const escaped = text.replace(/'/g"\\'").replace(/"/g, '&quot;');
+      const escaped = text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
       return `<button class="copy-btn" onclick="event.stopPropagation(); copyToClipboard('${escaped}', this)">Copy</button>`;
     }
 
