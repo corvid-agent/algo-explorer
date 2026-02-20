@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/preview.png" alt="algo-explorer preview" width="100%"></p>
+
 # Algo Explorer
 
 Lightweight Algorand block explorer for browsing blocks, transactions, accounts, and ASA tokens on mainnet.
